@@ -8,19 +8,16 @@
 
     <script>
         (function() {
-            // Store private reference to Jitsu instance
             let privateJitsuInstance = null;
+            let userEmail = null;
 
-            // Private scope for Jitsu configuration
             const jitsuConfig = {
                 initOnly: true
             };
 
-            // Create a closure to handle Jitsu initialization
             function initializeJitsu(jitsu) {
                 privateJitsuInstance = jitsu;
 
-                // Create analytics interface with limited exposure
                 window.analytics = {
                     track: function(eventName, properties) {
                         privateJitsuInstance.track(eventName, properties);
@@ -30,7 +27,6 @@
                     }
                 };
 
-                // Clean up all Jitsu-related objects
                 setTimeout(() => {
                     delete window.jitsu;
                     delete window.jitsuQ;
@@ -39,12 +35,10 @@
                 }, 0);
             }
 
-            // Temporary initialization function
             window.jitsuLoaded = function(jitsu) {
                 initializeJitsu(jitsu);
             };
 
-            // Add Jitsu script with configuration
             const script = document.createElement('script');
             script.src = 'https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js';
             script.async = true;
@@ -54,16 +48,55 @@
     </script>
 </head>
 <body>
-    <button onclick="handleClick()">Track Me</button>
+    <div style="margin: 20px;">
+        <form id="emailForm" onsubmit="handleEmailSubmit(event)">
+            <input 
+                type="email" 
+                id="emailInput" 
+                placeholder="Enter your email" 
+                required 
+                style="padding: 8px; margin-right: 10px;"
+            >
+            <button type="submit" style="padding: 8px 16px;">Set User ID</button>
+        </form>
+
+        <div id="userStatus" style="margin-top: 10px; color: #666;"></div>
+
+        <button 
+            onclick="handleClick()" 
+            style="margin-top: 20px; padding: 8px 16px;"
+        >
+            Track Me
+        </button>
+    </div>
 
     <script>
+        function handleEmailSubmit(event) {
+            event.preventDefault();
+            const email = document.getElementById('emailInput').value;
+            
+            if (window.analytics) {
+                // Identify the user
+                window.analytics.identify(email, {
+                    email: email,
+                    timeIdentified: new Date().toISOString()
+                });
+                
+                // Update UI
+                document.getElementById('userStatus').textContent = `Identified as: ${email}`;
+                
+                // Store email for tracking
+                window.userEmail = email;
+            }
+        }
+
         const handleClick = (function() {
-            // Private function scope
             return function() {
                 if (window.analytics) {
                     window.analytics.track('button_clicked', {
                         buttonName: 'Track Me',
-                        timestamp: new Date().toISOString()
+                        timestamp: new Date().toISOString(),
+                        userEmail: window.userEmail || 'anonymous'
                     });
                     alert('Event tracked!');
                 } else {
