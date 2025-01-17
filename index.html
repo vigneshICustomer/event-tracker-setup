@@ -11,8 +11,8 @@
         window.jitsuConfig = {
           initOnly: true  // Prevents automatic page event tracking
         };
-      </script>
-      <script>
+    </script>
+    <script>
         // Define the callback function that will run after Jitsu loads
         window.jitsuLoaded = function(jitsu) {
           // Store the original jitsu instance
@@ -31,12 +31,26 @@
           // Remove the global jitsu object
           delete window.jitsu;
         };
-      </script>
-      <script async src="https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js" data-onload="jitsuLoaded"></script>
-
-
+    </script>
+    <script async src="https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js" data-onload="jitsuLoaded"></script>
 </head>
 <body>
-    
+    <button onclick="handleClick()">Track Me</button>
+
+    <script>
+        function handleClick() {
+            // Check if analytics is available
+            if (window.analytics) {
+                window.analytics.track('button_clicked', {
+                    buttonName: 'Track Me',
+                    timestamp: new Date().toISOString()
+                });
+                alert('Event tracked!');
+            } else {
+                console.error('Analytics not initialized');
+                alert('Analytics not ready. Please try again.');
+            }
+        }
+    </script>
 </body>
 </html>
