@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="index.css">
+
+    <script>
+        // Configuration object (optional)
+        window.jitsuConfig = {
+          initOnly: true  // Prevents automatic page event tracking
+        };
+      </script>
+      <script>
+        // Define the callback function that will run after Jitsu loads
+        window.jitsuLoaded = function(jitsu) {
+          // Store the original jitsu instance
+          const originalJitsu = jitsu;
+          
+          // Create a wrapper object with only the functions we want to expose
+          window.analytics = {
+            track: function(eventName, properties) {
+              originalJitsu.track(eventName, properties);
+            },
+            identify: function(userId, traits) {
+              originalJitsu.identify(userId, traits);
+            }
+          };
+          
+          // Remove the global jitsu object
+          delete window.jitsu;
+        };
+      </script>
+      <script async src="https://jitsu-test.vercel.app/p.js" data-onload="jitsuLoaded"></script>
+
+
+</head>
+<body>
+    
+</body>
+</html>
