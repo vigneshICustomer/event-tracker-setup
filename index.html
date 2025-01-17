@@ -7,32 +7,51 @@
     <link rel="stylesheet" href="index.css">
 
     <script>
-        // Configuration object (optional)
-        window.jitsuConfig = {
-          initOnly: true  // Prevents automatic page event tracking
-        };
-      </script>
-      <script>
-        // Define the callback function that will run after Jitsu loads
-        window.jitsuLoaded = function(jitsu) {
-          // Store the original jitsu instance
-          const originalJitsu = jitsu;
-          
-          // Create a wrapper object with only the functions we want to expose
-          window.analytics = {
-            track: function(eventName, properties) {
-              originalJitsu.track(eventName, properties);
-            },
-            identify: function(userId, traits) {
-              originalJitsu.identify(userId, traits);
+        (function() {
+            // Store private reference to Jitsu instance
+            let privateJitsuInstance = null;
+
+            // Private scope for Jitsu configuration
+            const jitsuConfig = {
+                initOnly: true
+            };
+
+            // Create a closure to handle Jitsu initialization
+            function initializeJitsu(jitsu) {
+                privateJitsuInstance = jitsu;
+
+                // Create analytics interface with limited exposure
+                window.analytics = {
+                    track: function(eventName, properties) {
+                        privateJitsuInstance.track(eventName, properties);
+                    },
+                    identify: function(userId, traits) {
+                        privateJitsuInstance.identify(userId, traits);
+                    }
+                };
+
+                // Clean up all Jitsu-related objects
+                setTimeout(() => {
+                    delete window.jitsu;
+                    delete window.jitsuQ;
+                    delete window.jitsuConfig;
+                    delete window.jitsuLoaded;
+                }, 0);
             }
-          };
-          
-          // Remove the global jitsu object
-          delete window.jitsu;
-        };
-      </script>
-      <script async src="https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js" data-onload="jitsuLoaded"></script>
+
+            // Temporary initialization function
+            window.jitsuLoaded = function(jitsu) {
+                initializeJitsu(jitsu);
+            };
+
+            // Add Jitsu script with configuration
+            const script = document.createElement('script');
+            script.src = 'https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js';
+            script.async = true;
+            script.setAttribute('data-onload', 'jitsuLoaded');
+            document.head.appendChild(script);
+        })();
+    </script>
 </head>
 <body>
     <button onclick="handleClick()">Track Me</button>
