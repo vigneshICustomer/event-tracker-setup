@@ -7,50 +7,60 @@
     <link rel="stylesheet" href="index.css">
 
     <script>
-        // Configuration object (optional)
-        window.jitsuConfig = {
-          initOnly: true  // Prevents automatic page event tracking
-        };
-    </script>
-    <script>
-        // Define the callback function that will run after Jitsu loads
-        window.jitsuLoaded = function(jitsu) {
-          // Store the original jitsu instance
-          const originalJitsu = jitsu;
-          
-          // Create a wrapper object with only the functions we want to expose
-          window.analytics = {
-            track: function(eventName, properties) {
-              originalJitsu.track(eventName, properties);
-            },
-            identify: function(userId, traits) {
-              originalJitsu.identify(userId, traits);
+        (function() {
+            // Private scope for Jitsu configuration
+            const jitsuConfig = {
+                initOnly: true
+            };
+
+            // Create a closure to handle Jitsu initialization
+            function initializeJitsu(jitsu) {
+                // Create analytics interface with limited exposure
+                window.analytics = {
+                    track: function(eventName, properties) {
+                        jitsu.track(eventName, properties);
+                    },
+                    identify: function(userId, traits) {
+                        jitsu.identify(userId, traits);
+                    }
+                };
             }
-          };
-          
-          // Remove the global jitsu object
-          delete window.jitsu;
-        };
+
+            // Assign the initialization function without exposing config
+            window.jitsuLoaded = function(jitsu) {
+                initializeJitsu(jitsu);
+                // Clean up global reference
+                delete window.jitsuLoaded;
+            };
+
+            // Add Jitsu script with configuration
+            const script = document.createElement('script');
+            script.src = 'https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js';
+            script.async = true;
+            script.setAttribute('data-onload', 'jitsuLoaded');
+            document.head.appendChild(script);
+        })();
     </script>
-    <script async src="https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js" data-onload="jitsuLoaded"></script>
 </head>
 <body>
     <button onclick="handleClick()">Track Me</button>
 
     <script>
-        function handleClick() {
-            // Check if analytics is available
-            if (window.analytics) {
-                window.analytics.track('button_clicked', {
-                    buttonName: 'Track Me',
-                    timestamp: new Date().toISOString()
-                });
-                alert('Event tracked!');
-            } else {
-                console.error('Analytics not initialized');
-                alert('Analytics not ready. Please try again.');
-            }
-        }
+        const handleClick = (function() {
+            // Private function scope
+            return function() {
+                if (window.analytics) {
+                    window.analytics.track('button_clicked', {
+                        buttonName: 'Track Me',
+                        timestamp: new Date().toISOString()
+                    });
+                    alert('Event tracked!');
+                } else {
+                    console.error('Analytics not initialized');
+                    alert('Analytics not ready. Please try again.');
+                }
+            };
+        })();
     </script>
 </body>
 </html>
