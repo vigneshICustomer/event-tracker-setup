@@ -3,49 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Analytics Demo</title>
     <link rel="stylesheet" href="index.css">
-
-    <script>
-        (function() {
-            let privateJitsuInstance = null;
-            let userEmail = null;
-
-            const jitsuConfig = {
-                initOnly: true
-            };
-
-            function initializeJitsu(jitsu) {
-                privateJitsuInstance = jitsu;
-
-                window.analytics = {
-                    track: function(eventName, properties) {
-                        privateJitsuInstance.track(eventName, properties);
-                    },
-                    identify: function(userId, traits) {
-                        privateJitsuInstance.identify(userId, traits);
-                    }
-                };
-
-                setTimeout(() => {
-                    delete window.jitsu;
-                    delete window.jitsuQ;
-                    delete window.jitsuConfig;
-                    delete window.jitsuLoaded;
-                }, 0);
-            }
-
-            window.jitsuLoaded = function(jitsu) {
-                initializeJitsu(jitsu);
-            };
-
-            const script = document.createElement('script');
-            script.src = 'https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js';
-            script.async = true;
-            script.setAttribute('data-onload', 'jitsuLoaded');
-            document.head.appendChild(script);
-        })();
-    </script>
 </head>
 <body>
     <div style="margin: 20px;">
@@ -70,41 +29,26 @@
         </button>
     </div>
 
+    <script src="/iCustomer.js"></script>
     <script>
-        function handleEmailSubmit(event) {
+        window.handleEmailSubmit = (event) => {
             event.preventDefault();
             const email = document.getElementById('emailInput').value;
             
-            if (window.analytics) {
-                // Identify the user
-                window.analytics.identify(email, {
-                    email: email,
-                    timeIdentified: new Date().toISOString()
-                });
-                
-                // Update UI
-                document.getElementById('userStatus').textContent = `Identified as: ${email}`;
-                
-                // Store email for tracking
-                window.userEmail = email;
-            }
-        }
+            iCustomer.identify(email, {
+                email: email
+            });
+            
+            // Update UI
+            document.getElementById('userStatus').textContent = `Identified as: ${email}`;
+        };
 
-        const handleClick = (function() {
-            return function() {
-                if (window.analytics) {
-                    window.analytics.track('button_clicked', {
-                        buttonName: 'Track Me',
-                        timestamp: new Date().toISOString(),
-                        userEmail: window.userEmail || 'anonymous'
-                    });
-                    alert('Event tracked!');
-                } else {
-                    console.error('Analytics not initialized');
-                    alert('Analytics not ready. Please try again.');
-                }
-            };
-        })();
+        window.handleClick = () => {
+            iCustomer.track('button_clicked', {
+                buttonName: 'Track Me'
+            });
+            alert('Event tracked!');
+        };
     </script>
 </body>
 </html>
