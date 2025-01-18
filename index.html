@@ -31,10 +31,15 @@
 
     <script src="https://cdn.jsdelivr.net/gh/vigneshICustomer/iCustomer-jitsu-config/iCustomer.min.js"></script>
     <script>
-        // Initialize iCustomer with analytics URL
-        iCustomer.init({
-            analyticsUrl: 'https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js'
-        });
+        // Initialize iCustomer after script loads
+        function initializeAnalytics() {
+            iCustomer.init({
+                analyticsUrl: 'https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js'
+            });
+        }
+
+        // Wait for script to load
+        document.querySelector('script[src*="iCustomer.js"]').onload = initializeAnalytics;
 
         window.handleEmailSubmit = (event) => {
             event.preventDefault();
