@@ -3,12 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Demo</title>
+    <title>ICustomer Example</title>
     <link rel="stylesheet" href="index.css">
+    
+    <!-- Include tracking script -->
+    <script src="tracking.js"></script>
+
+    <script>
+        // Initialize once at start
+        ICustomerService.initialize({
+            tenantId: "zillasecurity-8938439037"
+        });
+
+        // Example usage of static methods
+        async function onSubmit(event) {
+            event.preventDefault();
+            const email = document.getElementById('emailInput').value;
+            
+            try {
+                // Use static identify method
+                await ICustomerService.identify(email, {
+                    email: email,
+                    source: 'signup_form'
+                });
+
+                // Use static track method
+                await ICustomerService.track('signup_success', {
+                    email: email,
+                    timestamp: new Date().toISOString()
+                });
+
+                // Use static getCurrentUser method
+                const userId = ICustomerService.getCurrentUser();
+                document.getElementById('status').textContent = 'Success! User ID: ' + userId;
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
 </head>
 <body>
     <div style="margin: 20px;">
-        <form id="emailForm" onsubmit="handleEmailSubmit(event)">
+        <h2>Static Method Usage Example</h2>
+        
+        <form onsubmit="onSubmit(event)">
             <input 
                 type="email" 
                 id="emailInput" 
@@ -16,49 +54,20 @@
                 required 
                 style="padding: 8px; margin-right: 10px;"
             >
-            <button type="submit" style="padding: 8px 16px;">Set User ID</button>
+            <button type="submit" style="padding: 8px 16px;">
+                Sign Up
+            </button>
         </form>
 
-        <div id="userStatus" style="margin-top: 10px; color: #666;"></div>
+        <div id="status" style="margin-top: 10px; color: #666;"></div>
 
-        <button 
-            onclick="handleClick()" 
-            style="margin-top: 20px; padding: 8px 16px;"
-        >
-            Track Me
-        </button>
+        <p style="margin-top: 20px; color: #666;">
+            Using static methods:
+            <br>ICustomerService.initialize()
+            <br>ICustomerService.identify()
+            <br>ICustomerService.track()
+            <br>ICustomerService.getCurrentUser()
+        </p>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/gh/vigneshICustomer/iCustomer-jitsu-config/iCustomer.js"></script>
-    <script>
-        // Initialize iCustomer after script loads
-        function initializeAnalytics() {
-            iCustomer.init({
-                analyticsUrl: 'https://cm60qnthl00002v6orm0kilny.d.jitsu.com/p.js'
-            });
-        }
-
-        // Wait for script to load
-        document.querySelector('script[src*="iCustomer.js"]').onload = initializeAnalytics;
-
-        window.handleEmailSubmit = (event) => {
-            event.preventDefault();
-            const email = document.getElementById('emailInput').value;
-            
-            iCustomer.identify(email, {
-                email: email
-            });
-            
-            // Update UI
-            document.getElementById('userStatus').textContent = `Identified as: ${email}`;
-        };
-
-        window.handleClick = () => {
-            iCustomer.track('button_clicked', {
-                buttonName: 'Track Me'
-            });
-            alert('Event tracked!');
-        };
-    </script>
 </body>
 </html>
